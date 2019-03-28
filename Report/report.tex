@@ -1,0 +1,921 @@
+% @Author: Zazu
+% @Date:   2018-09-09 00:48:05
+% @Last Modified by:   Zazu
+% @Last Modified time: 2018-10-18 21:02:07
+
+\documentclass[titlepage]{article}
+\usepackage[hidelinks]{hyperref}
+\usepackage[T1]{fontenc}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{comment}
+\usepackage[babel]{csquotes}
+\usepackage{geometry}
+\geometry{
+   a4paper,
+}
+
+\usepackage[
+backend=biber,
+style=alphabetic,
+sorting=ynt
+]{biblatex}
+\addbibresource{report.bib}
+
+% This colour highlighting settings for PHP is taken from
+% https://tex.stackexchange.com/questions/53928/is-there-a-good-definition-for-highlighting-php-code-in-listings
+\usepackage{listings,xcolor}
+
+\definecolor{dkgreen}{rgb}{0,.6,0}
+\definecolor{dkblue}{rgb}{0,0,.6}
+\definecolor{dkyellow}{cmyk}{0,0,.8,.3}
+\lstset{
+  language         = php,
+  basicstyle       = \small\ttfamily,
+  keywordstyle     = \color{dkblue},
+  stringstyle      = \color{red},
+  identifierstyle  = \color{dkgreen},
+  commentstyle     = \color{gray},
+  emph             =[1]{php},
+  emphstyle        =[1]\color{black},
+  emph             =[2]{if,and,or,else},
+  emphstyle        =[2]\color{dkyellow},
+  breaklines       = true,
+  showstringspaces = false}
+
+\title{CCSEP Assignment}
+
+\date{\today}
+\author{
+   Jonathon Winter \\ 
+   Student ID: 1885 6204 \\
+   Unit: Cyber Crime - Security Enhanced Programming 
+}
+
+\lhead{Jonathon Winter}
+\chead{CCSEP Assignment 2018}
+\rhead{1885 6204}
+\pagestyle{fancy}
+
+
+\begin{document}
+
+\pagenumbering{gobble}
+\maketitle 
+\newpage
+\pagenumbering{arabic}
+
+\setcounter{tocdepth}{2}
+\tableofcontents
+\newpage
+
+\section{Overview} % (fold)
+\label{sec:overview}
+
+% section overview (end)
+
+\section{Vulnerabilities} % (fold)
+\label{sec:vulnerabilities}
+
+   \subsection{XXS - Reflected} % (fold)
+   \label{sub:xxs_reflected}
+
+      \url{https://www.owasp.org/index.php/Cross-site_Scripting_(XSS)}
+   
+      \subsubsection{Description} % (fold)
+      \label{ssub:xxs_reflected_description}
+      
+      Reflected XXS is a vulnerabilty where an attacker can inject code (typcially script tags) into a website via the input that they have entered. This is due to the fact that the website is updated accordinly to what a user has entered
+
+      The script is generally activated through a link that the attacker sends around in order to get clicks, and when clicked it will load the website and the malicous code
+
+      Lets say a website is seen as such http://www.injectable.com?name=John and when loaded it says "Hello John" then if I was to replace the value of name to <script>alert(document.cookie)</script> then when the page loads it will execute the script if it hasnt been cleaned first
+
+
+      % subsubsection description (end)
+
+      \subsubsection{Possible Exploits} % (fold)
+      \label{ssub:xxs_reflected_possible_exploits}
+      
+      The most common type of XXS Reflected attack is that once the link has loaded it will grab the users current session ID and send it to the attacker, with this the attacker can then log into the website and pretend to b that user. 
+
+      In this situation however, in order to obtain a session ID the user must be logged in to the website already. In the case they arent then it will not work.
+
+      % subsubsection possible_exploits (end)
+
+      \subsubsection{Location} % (fold)
+      \label{ssub:xxs_reflected_location}
+      
+      The location of the vulnerability is in movies.php. As seen the user can enter a search string and it will no only display the matching movies however also display what the user had entered. So in this case when a script tag is entered it will add it to the HTML page and will be executed once it reaches the client. 
+
+   \begin{lstlisting}
+   <?php echo ($query != "All" && $query != '' ?  "$query" : "All" )?>
+   \end{lstlisting}
+
+      % subsubsection location (end)
+
+      \subsubsection{Instructions} % (fold)
+      \label{ssub:xxs_reflected_instructions}
+      
+      \begin{enumerate}
+         \item Create malicous link. 
+         \begin{itemize}
+            \url{https://192.168.56.150/movies.php?query=a<script>alert(document.cookie)</script>}
+         \end{itemize}
+         \item Send the link to someone to click.
+      \end{enumerate}
+
+      % subsubsection instructions (end)
+
+      \subsubsection{Mitigate Strategy} % (fold)
+      \label{ssub:xxs_reflected_mitigate_strategy}
+
+      The main method of fixing this would be to strip the tags and escape all escape characters from all input from the users that are reflected back to the user. The other method is to simply not reflect anything back to the website from user input, however this option isn't always available
+      
+      % subsubsection mitigate_strategy (end)
+
+   % subsection xxs_stored (end)
+   
+   \subsection{XXS - Stored} % (fold)
+   \label{sub:xxs_stored}
+
+      \url{https://www.owasp.org/index.php/Cross-site_Scripting_(XSS)}
+   
+      \subsubsection{Description} % (fold)
+      \label{ssub:xxs_stored_description}
+
+      XXS Stored is very similar to XXS reflected however with the goal of being stored on the server, so when a usual client loads the page it will execute the script that an attacker has entered. This method, if can be done, if much more dangerous than XXS reflected since it ensured that the user is already using the website and no extra links have to be pressed in order to execute the malicouc script
+
+      % subsubsection description (end)
+
+      \subsubsection{Possible Exploits} % (fold)
+      \label{ssub:xxs_stored_possible_exploits}
+      
+      The same type of exploit can occur for XSS reflected and stored. If the attacker is able to grab the users session ID and send it to the attacker then they can pretend to be them and log in as them. This is however only one of the infinite list of attacks that an attacker can do.
+
+      % subsubsection possible_exploits (end)
+
+      \subsubsection{Location} % (fold)
+      \label{ssub:xxs_stored_location}
+
+      This vulnerability is located in the reviews section of a movie. When a specific movie page is loaded, all of the reviews that have been submitted are also displayed at the bottom. If any tags are in someone's review, whether it be <b> bold tags, <i> italic tags or the infamous <script> tags they will be placed directly in. The file that includes this vulnerability is movie.php\\
+
+      Here is how your review is retrieved from the form:
+
+      \begin{lstlisting}
+      $review = $_POST['review'];
+      \end{lstlisting}
+
+      And here is where the review is printed out (If it isn't your own review)
+
+      \begin{lstlisting}
+      <?php echo $row['review']?>
+      \end{lstlisting}
+
+      % subsubsection location (end)
+
+      \subsubsection{Instructions} % (fold)
+      \label{ssub:xxs_stored_instructions}
+      
+      \begin{enumerate}
+         \item Either log in or register an account
+         \item Go to the movies page and purchase any movie
+         \item Once purchased the review block should appear for you to enter a review
+         \item Add your malicious script in this textarea and then submit review\\\\
+         ex: This Movie was <script>alert(\textbackslash'hi\textbackslash')</script> really awesome
+         \item Log in as another user and go to the same move page. The script will then execute
+      \end{enumerate}
+
+      % subsubsection instructions (end)
+
+      \subsubsection{Mitigate Strategy} % (fold)
+      \label{ssub:xxs_stored_mitigate_strategy}
+      
+      This vulnerability can be mitigated by either allowing no tags in the review section and then using the $strip\_tags()$ function to remove them if present, or to only allow a select few tags that are designed just for styling, such as <b> and <i>
+
+      % subsubsection mitigate_strategy (end)
+
+   % subsection xxs_stored (end)
+
+   \subsection{SQL Injection} % (fold)
+   \label{sub:sql_injection}
+
+      \url{https://www.owasp.org/index.php/SQL_Injection}
+   
+      \subsubsection{Description} % (fold)
+      \label{ssub:sql_injection_description}
+      
+      SQL Injection is an attack that consists of the attacker injection part of an SQL query into a query string to be executed. Depending on where the injection takes place, it could affect any type of query whether it be an insert, select, update or delete.
+
+      The overall goal of SQL Injection is to either gain access to information, ie. changing authorization level, or to cause damage to the system, ie. deleting values.
+
+      % subsubsection description (end)
+
+      \subsubsection{Possible Exploits} % (fold)
+      \label{ssub:sql_injection_possible_exploits}
+      
+      By being able to execute an SQL injection the attacker can modify fields that that normally are not able to. Depending on how the queries are set up they could easily do ";DROP Tables\#" and then whoops, everything has been deleted. Not all attacks are going to be this detrimental, however attackers do find other ways to gain information that they shouldn't have, or to cause harm to the system.
+
+      If the attacker finds a field that they can use to update their own user details, then they could possibly use it to update more details that they normally don't have access to. 
+
+      \textit{Example shown below in Instructions}
+
+      % subsubsection possible_exploits (end)
+
+      \subsubsection{Location} % (fold)
+      \label{ssub:sql_injection_location}
+      
+      The type of SQL Injection that is mainly accessibly by all is an UPDATE query that modifies details about the current user. The vulnerability is located at \url{https://192.168.56.150/account.php?view=details}. 
+
+      The value inside the newBalance field is used to directly modify the balance of the current user by executing the SQL query UPDATE. The query template is: 
+
+      \begin{lstlisting}
+      $sql = "UPDATE Users SET balance='".$_POST['newBalance']."'
+               WHERE userID = '$userID'";
+      \end{lstlisting}
+
+      Since the value of newBalance cannot directly be edited by the user it is believed to be safe and is used directly in the middle of the query. IF the value of newBalance was to somehow be maliciously set then the query could be corrupted.
+
+      % subsubsection location (end)
+
+      \subsubsection{Instructions} % (fold)
+      \label{ssub:sql_injection_instructions}
+      
+      \begin{enumerate}
+         \item go to \url{https://192.168.56.150/account.php?view=details}
+         \item open up developer tools (F12) and locate the input field for "new Balance"
+         \item remove the readonly tag and change type="number" to type="string"
+      \end{enumerate}
+         This allows you to modify the value inside the input field directly as before it was set to be readonly and could only contains numbers, if anything else was inserted then it wouldn't submit the form. 
+      \begin{enumerate}[resume]
+         \item Change the value of "New Balance" to the malicious SQL query 
+         \begin{itemize}
+            \item 500', access='admin
+         \end{itemize}
+            Sets by balance to 500 and my access level to admin (reload the page or goto another page to see the admin panel now appear)
+         \begin{itemize}[resume]
+            \item 0', where '1'='1'\#
+         \end{itemize}
+            Sets the balance of all users to 0
+      \end{enumerate}
+
+      % subsubsection instructions (end)
+
+      \subsubsection{Mitigate Strategy} % (fold)
+      \label{ssub:sql_injection_mitigate_strategy}
+      
+      There are 2 main methods for fixing this type of vulnerability
+
+      \begin{enumerate}
+         \item Prepared statements
+         \item Escape special characters (',",\#...)
+      \end{enumerate}
+
+      Prepared statements: A prepared statement is a very similar to an SQL query however a template is first build and prepared via the database and then is called upon when requested by filling in the missing values. This method is a simple solution as it not only allows the use of the same query multiple times but removes the need to escape any values that will be used.
+
+      Escape special characters: Values such as ', ", \# and so forth can be used to manipulate an sql query and make it append new sections or completely cut it off early via the comment character. By first checking the value that is to be placed into the query, either removing the escape characters or by putting a \textbackslash in front of them to make them redundant. This method is not foolproof though as there can be some methods around it and therefore if possible, prepared statements are probably the best fit.
+
+      % subsubsection mitigate_strategy (end)
+
+   % subsection sql_injection (end)
+
+   \subsection{SQL Injection Blind} % (fold)
+   \label{sub:sql_injection_blind}
+
+      \url{https://www.owasp.org/index.php/SQL_Injection}
+   
+      \subsubsection{Description} % (fold)
+      \label{ssub:sql_injection_blind_description}
+      
+      A blind SQL injection is very similar to the normal SQL injection attack where the goal is to inject data into an sql query to get more information or manipulate the system, however blind SQL has a different method of doing this. 
+
+      Blind SQL is a method used to query a database when the only results that you are able to see are true or false. So if you were to query 1=1 it would return true or an appropriate message, however change it to ask if 1=2 then it would return false. While it may seen tedious, after a certain amount of querying and asking filtering, information on the whole database can be figured out.   
+
+      % subsubsection description (end)
+
+      \subsubsection{Possible Exploits} % (fold)
+      \label{ssub:sql_injection_blind_possible_exploits}
+      
+      While a simple true or false return value doesn't seem to bad, imagine if they started asking if the name of the database matches 'x' or if it contains 'y'. After a few attempts of this they will get to know the database name. Ok cool what's next, lets see if we can enumerate character by character what the table names are, next we can go for the columns in each table, and well would you look at that, they now have the whole layout of an entire database with all its tables and columns sorted out. 
+
+      % subsubsection possible_exploits (end)
+
+      \subsubsection{Location} % (fold)
+      \label{ssub:sql_injection_blind_location}
+         
+      The location of this vulnerability in the website is at the login page. \url{https://192.168.56.150/login.php}, but to be more precise it is in the file server.php. If a incorrect username is entered then the error states so, however if a valid username is used with an incorrect password then the error states a different prompt. 
+
+      By realising this, an attacker than then check if the username field is injectable and vulnerable to SQL injection 
+
+      \begin{lstlisting}
+
+      $sql = "SELECT * FROM Users WHERE username = '$username'";
+      $results = mysqli_query($db,$sql);
+
+      /*...*/
+
+      $count = mysqli_num_rows($results);
+
+      if($count > 0){
+         $row = mysqli_fetch_assoc($results);
+         if(password_verify($password, $row['password'])){
+            /*Redirect to login*/
+         }else
+            array_push($errors, "Invalid password for user: $username");
+      }else
+         array_push($errors, "No user exists with that username");
+      \end{lstlisting}
+
+      % subsubsection location (end)
+
+      \subsubsection{Instructions} % (fold)
+      \label{ssub:sql_injection_blind_instructions}
+      
+      Enter these values into the username field and press submit. The value of the password field is irrelevant 
+
+      \begin{enumerate}
+         \item hello' OR '1'='1'\#
+         \item hello' OR '1'='2'\#
+      \end{enumerate}
+         Very simple examples to show that the field allows multiple checks in it. The ' are used to escape the current string. Which quotes to use can be determined though multiple attempts to see which ones work 
+      \begin{enumerate}[resume]
+         \item hello' OR database() = 'assignment'\#
+         \item hello' OR database() = 'HelloWorld'\#
+      \end{enumerate}
+         Returns true and then false, this shows that the name of the database is assignment. Obviously guessing this in one hit is quite unlikely and the multiple questions would be asked before this is discovered.
+
+      % subsubsection instructions (end)
+
+      \subsubsection{Mitigate Strategy} % (fold)
+      \label{ssub:sql_injection_blind_mitigate_strategy}
+      
+      Just like normal SQL injections, the same methods of mitigating it can be used, this therefore includes prepared statements and escape escape characters. The other method that can be used to prevent Blind SQL injection is to generalize the errors. In this example change the error message for invalid username and invalid password to be the same message ``Incorrect username or password'' disregarding what actaully caused the unsuccessful login.
+      % subsubsection mitigate_strategy (end)
+
+   % subsection sql_injection_blind (end)
+
+   \subsection{PHP File Include} % (fold)
+   \label{sub:php_file_include}
+
+      \url{https://www.owasp.org/index.php/PHP_File_Inclusion}
+   
+      \subsubsection{Description} % (fold)
+      \label{ssub:php_file_include_description}
+      
+      In PHP and many other languages the functionality to include a file to be used in the current file is used to simplify and reuse snippets of code or design. The use of it is used in many situations for valid reasons, such as can be seen in my implementation where I have set it up where every page first loads a verifyLogin.php file which checks that a session is currently active and if not then redirects to the login. 
+   
+      % subsubsection description (end)
+
+      \subsubsection{Possible Exploits} % (fold)
+      \label{ssub:php_file_include_possible_exploits}
+   
+      In the case stated above the file that is to be loaded is purely hard-coded and therefore can most likely not be changed by the user, however what is the file that was included was dependant on what a user has entered or what a GET or POST variable was. If the attacker was to manipulate the value of that variable then a they could potentially load any file on the system, once they figured out what the include command looks like. 
+
+      % subsubsection possible_exploits (end)
+
+      \subsubsection{Location} % (fold)
+      \label{ssub:php_file_include_location}
+      
+      The location of this exploit in my website is in the account.php page. When loaded a noticeable variable is appended to the URL string and by default is "view=details". This by itself seems fine, however when the page is changed to the purchased movies or the reviews section then the value of view is changed to purchased and reviews respectively while the url is still https://192.168.56.150/account.php. This shows that the content shown is most likely determined by a include function which uses the view variable. If the value of view is manually changed to something invalid then the body contents it empty.
+
+      \begin{lstlisting}
+
+      /*If view page is set then use that one*/
+      if(isset($_GET['view'])){
+         $view = $_GET['view'];
+      }else{/*Else just use the default one*/
+         $view = "details";
+      }
+
+      /* ... */
+
+      <div class="container">
+         
+         <?php include("$view.php"); ?>
+
+      </div>
+
+      \end{lstlisting}
+
+      % subsubsection location (end)
+
+      \subsubsection{Instructions} % (fold)
+      \label{ssub:php_file_include_instructions}
+      
+      \begin{enumerate}
+         \item To show that it works: \url{https://192.168.56.150/account.php?view=}
+         \item To include another page:\url{https://192.168.56.150/account.php?view=includeme}
+         \item To extract another php page:
+         \begin{itemize}
+            \item Goto: \url{https://192.168.56.150/account.php?view=php://filter/convert.base64-encode/resource=account}
+            \item Copy the base64 text that appears
+            \item Decode it and viola you have a copy of the php file
+         \end{itemize}
+      \end{enumerate}
+
+
+      % subsubsection instructions (end)
+
+      \subsubsection{Mitigate Strategy} % (fold)
+      \label{ssub:php_file_include_mitigate_strategy}
+      
+      To help in mitigating the potential damage from a file include a few settings can be changed to assist in it, the first one being allow\_url\_include. By turning this off it removes the possibility for any file include to be linked to another page that isn't on the host machine, meaning you can no longer run an evil php page or so forth. The other setting to turn off would be allow\_url\_fopen which once turned off just adds another layer of protecting from slightly different file includes from a remote server. 
+
+      In the situation such as my implementation where it can be used to include a local file, a very simple method of restriction has already been used. The .php extension is added manually in when the file is to be included, and because of this files such as passwd cannot be extracted. However this doesnt stop them from including other php files and if a malicious php file was to end up in the system then they can do whatever they wish. 
+
+      To add another slight level of protection against the base64 filter, by appending a directory path infront of the file to be include.
+
+      \begin{lstlisting}
+      <?php include("./$view.php"); ?>
+      \end{lstlisting}
+
+      In this case aswell, their are only 3 viable pages that should ever be the value of view, therefore when first extracting the value of \$\_GET['view'], verify that it is 1 of those 3, else disregard it
+
+      % subsubsection mitigate_strategy (end)
+
+   % subsection php_file_include (end)
+
+   \subsection{Broken Access Controls} % (fold)
+   \label{sub:broken_access_controls}
+
+      \url{https://www.owasp.org/index.php/Broken_Access_Control}
+   
+      \subsubsection{Description} % (fold)
+      \label{ssub:broken_access_controls_description}
+   
+      Access control is used to determine if the level of authorization of the current user has correct permissions to gain access to something, however if these settings are not set up correctly then unauthorised accesses and modifications can occur.
+
+      % subsubsection description (end)
+
+      \subsubsection{Possible Exploits} % (fold)
+      \label{ssub:broken_access_controls_possible_exploits}
+      
+      If access control is not set up correctly then access to pages and information may be done while either unauthorised or not even logged-in. In a situation like this, an attacker may gain information that they would not normally have access to and in many cases be able to modify values that are only available to users or higher privileges, usually an admin.
+
+      % subsubsection possible_exploits (end)
+
+      \subsubsection{Location} % (fold)
+      \label{ssub:broken_access_controls_location}
+      
+      The location of this exploit is quite obvious however is a implementation that occurs to often. When a user is logged in and has either access level or admin or moderator, they are able to view the admin section in the navbar and use that to navigate to the relevant pages to alter both movies and users. In the case when a normal user is logged in the admin section is no longer visible and no sign of it is available to the user, so it should be safe and hidden correct?
+
+      If you navigate to the url \url{http://192.168.56.150/admin} then you shall see that there is a folder called admin and inside of it is 2 very specific pages, editUsers and editMovies. If the pages are tried to be accessed it will return the user back to the login page to start a session, however in the case a user is currently logged in then it will give them direct access to the page irrelevant of what their actual permission are.
+
+      While there is they go into editUsers.php then they will be able to not only modify their details but the details of any other users, this includes admin.
+      % subsubsection location (end)
+
+      \subsubsection{Instructions} % (fold)
+      \label{ssub:broken_access_controls_instructions}
+      
+      \begin{enumerate}
+         \item Log in or register an account
+         \item Goto \url{https://192.168.56.150/admin}
+         \item Select one of the two php pages that have appeared
+         \item Viola you now have access to information and modification power that only admin and moderators should have. Enjoy.
+      \end{enumerate}
+
+      % subsubsection instructions (end)
+
+      \subsubsection{Mitigate Strategy} % (fold)
+      \label{ssub:broken_access_controls_mitigate_strategy}
+      
+      Obviously the pages cannot be removed, so therefore further protection must be added to them. A simple method would be to verify the access level of the user when the page is first requested and if the access level doesnt match the required level then to display a 404 Page not found error. By displaying a 404 error it makes it appear as it the folder and files don't exist and aren't just restricted
+
+      Another level of protection to add would be that at the time any modifications are made double check the users access level directly from the database and not from the session. That way even if they did get to the page, they cant do anything. This method only reduces the damage, as the attacker would still be able to view the page and its contents. 
+
+      % subsubsection mitigate_strategy (end)
+
+   % subsection broken_access_controls (end)
+
+% section vulnerabilities (end)
+
+\section{Other Vulnerabilities} % (fold)
+\label{sec:other_vulnerabilities}
+
+   \subsection{Unrestricted File Upload} % (fold)
+   \label{sub:unrestricted_file_upload}
+
+      \url{https://www.owasp.org/index.php/Unrestricted_File_Upload}
+   
+      \subsubsection{Description} % (fold)
+      \label{ssub:unrestricted_file_upload_description}
+      
+      Uploading a file can be used for many useful purposes, such as data storage, profile images and for sharing with others. However if the contents of what's in the file isn't checked or if no restrictions are added then in many cases you are opening up your system for the world to take
+
+      % subsubsection description (end)
+
+      \subsubsection{Possible Exploits} % (fold)
+      \label{ssub:unrestricted_file_upload_possible_exploits}
+      
+      If a system allows any and all files to be uploaded to the server then in most cases, such as a website, they are open to many types of attacks. If a php file was uploaded to the server, and stored in the directory of the webpage for example, then I could add any code I wanted to that page and it will be executed once I open that new webpage.
+
+      This allows an attacker to have an endless supply of potential exploits that they can run, it could be from running a custom sql query to displaying the contents of the folder hierarchy or to take it to the next level, give themselves a reverse shell straight into the system.
+
+      % subsubsection possible_exploits (end)
+
+      \subsubsection{Location} % (fold)
+      \label{ssub:unrestricted_file_upload_location}
+      
+      The main location of this exploit is in the details page of the account section: \url{https://192.168.56.150/account.php}. Once logged in and navigated to that page a user can upload a profile image to be used.
+
+      The server side verification of the file is only the minimum amount needed to verify that the file is valid. No checks for file types or valid extensions are done only that the file exists and that it is less than 2MB of storage (Default PHP maximum upload size). Once verified the users profile image is set to the path of the new file and while the name is changed to the usersID to prevent overwriting another's users upload, the extension is still maintained\\ 
+
+      details.php:
+
+      \begin{lstlisting}
+   if(file_exists($_FILES['newPhoto']['tmp_name'][0])){
+      $file_tmp =$_FILES['newPhoto']['tmp_name'];
+      $file_type=$_FILES['newPhoto']['type'];
+      $file_ext_tmp=explode('.',$_FILES['newPhoto']['name']);
+      $file_ext=strtolower(end($file_ext_tmp));
+
+      /*Change the filename to the UserID but maintain the extension*/
+      /*A list of allowed extensions need to be created. ATM just allow them all*/
+      $file_name = $userID.".".$file_ext;         
+
+      /*Delete the current profile pic*/
+      shell_exec("rm img/profile/$userID.* 2>/dev/null");
+
+      /*Upload the file*/
+      move_uploaded_file($file_tmp,"img/profile/".$file_name);
+
+      $sql = "UPDATE Users SET image = '$file_name' WHERE userID = '$userID'";
+
+      mysqli_query($db, $sql);
+
+      /*Set the new image for the image locally for the time being*/
+      $user['image']=$file_name;
+   }
+      \end{lstlisting}
+
+      % subsubsection location (end)
+
+      \subsubsection{Instructions} % (fold)
+      \label{ssub:unrestricted_file_upload_instructions}
+      
+      The following guide is just a proof of concept that this works. no malicious content is in the file to be uploaded, however can easily be changed to cause a reverse shell (has been tested)
+
+      \begin{enumerate}
+         \item Obtain or create a simple php file. Only needs to have a single line in it such as <h1>I did it</h1>
+         \item Log in or register an account: \url{https://192.168.56.150/login.php}
+         \item Goto \url{https://192.168.56.150/account.php}
+         \item Select to upload an the custom php file
+         \item After uploading navigate to \url{https://192.168.56.150/img/profile/x.php} where 'x' is your userID.
+         \item Your custom php should now be previewed.
+      \end{enumerate}
+
+      % subsubsection instructions (end)
+
+      \subsubsection{Mitigate Strategy} % (fold)
+      \label{ssub:unrestricted_file_upload_mitigate_strategy}
+      
+      There are 2 main methods that can be used to fix this issue.
+
+      \begin{enumerate}
+         \item Restrict file uploads to be of a certain or range or extensions
+      \end{enumerate}
+      When the file is uploaded check if the extension of the upload is an allowed extension. In order to do this a whitelist of image types but be sorted out. For example just allow jpg and png files and if the file is anything else then reject it, even it is possibly an image. 
+      \begin{enumerate}[resume]
+         \item Remove the complete feature of profile pictures (not always feasible)
+      \end{enumerate}
+      If the use of a file upload isn't required and causes no beneficial advantage to the system then the easiest way to reduce the chance of damage is to completely remove the functionality. Obviously this can not always be done and the previous method should be used. 
+
+
+      % subsubsection mitigate_strategy (end)
+
+   % subsection unrestricted_file_upload (end)
+   
+   \subsection{Empty Password} % (fold)
+   \label{sub:empty_password}
+
+      \url{https://www.owasp.org/index.php/Empty_String_Password}
+   
+      \subsubsection{Description} % (fold)
+      \label{ssub:empty_password_description}
+      
+      Allowing the use of an empty password for a user when registering and logging in to the system. 
+
+      % subsubsection description (end)
+
+      \subsubsection{Possible Exploits} % (fold)
+      \label{ssub:empty_password_possible_exploits}
+      
+      By allowing an empty password to be used for an account, it removes any attempt to ensure that users are using strong passwords and allow an attacker to get straight access to a user by only knowing their usernames. 
+
+      Since a username is displayed in both the users.php page for admin and if they have made a review on the movie then getting a list of usernames isn't that hard.
+
+      % subsubsection possible_exploits (end)
+
+      \subsubsection{Location} % (fold)
+      \label{ssub:empty_password_location}
+      
+      Empty passwords can be set when registering an account and used when logging in. They can also be set at the update password section in the account page. The only validation done is that they are the same
+
+      \begin{lstlisting}
+
+   ...
+
+   $password1 = $_POST['password1'];
+   $password2 = $_POST['password2'];
+
+   ...
+
+   if($password1 != $password2)
+      array_push($registerErrors, "Your passwords do not match");
+
+   ...
+
+      \end{lstlisting}
+
+      % subsubsection location (end)
+
+      \subsubsection{Instructions} % (fold)
+      \label{ssub:empty_password_instructions}
+      
+      \begin{itemize}
+         \item Go to \url{https://192.168.56.150/login.php}
+         \item Use username: Chris Chang
+         \item Leave password field empty
+         \item Press login.
+         \item Congrats, you're in. 
+      \end{itemize}
+
+      % subsubsection instructions (end)
+
+      \subsubsection{Mitigate Strategy} % (fold)
+      \label{ssub:empty_password_mitigate_strategy}
+      
+      Set in place a password policy where it must be x characters long and have x amount of special characters. That way it reduces the change of a users password being brute forced and a user having a extremely insecure password. 2 quick modifications can be done though to the current code
+
+      \begin{enumerate}
+         \item Make is so that a password has to be entered. Add the ``required'' value
+      \begin{lstlisting}
+<input type="password" name="password1" id="password1" required>
+      \end{lstlisting}
+         \item Ensure client side that the password isn't empty (Can never trust the client)
+         \begin{lstlisting}
+if(empty($password1)) 
+   array_push($registerErrors, "Password cannot be empty"); 
+         \end{lstlisting}
+      \end{enumerate}
+
+      % subsubsection mitigate_strategy (end)
+
+   \subsection{Using a broken or risky cryptographic algorithm} % (fold)
+   \label{sub:using_a_broken_or_risky_cryptographic_algorithm}
+   
+      \url{https://www.owasp.org/index.php/Using_a_broken_or_risky_cryptographic_algorithm}
+
+      \subsubsection{Description} % (fold)
+      \label{ssub:description}
+         
+      When trying to protect data or obscure it to hide the original value, a cryptographic algorithm is usually used, however if there is an issue with the algorithm used then it can potentially be reversed enginerred and what was once believed to be secret is now known by most likely someone who shouldnt see it. If the algorithm used is infact broken/exploitable then using it will have the same effect as if the passwords were written in plain text in the source code of the website. While not everyone will notice it there, once they inspect it they will be able to get the password without much struggle.
+
+      % subsubsection description (end)
+
+      \subsubsection{Possible Exploits} % (fold)
+      \label{ssub:possible_exploits}
+      
+      In the example of this website, the value that has a cryptographic algorithm to secure it is the password of a user. Not if an attacker was to obtain the hashed1 password, then they will be able to log in as that user and pretend to be that user while using the system, therefore hiding the fact that it was actually them logged in. In some cases if people use the same password for multiple accounts, then it also allows them to try gain access to other websites and applications that they use. 
+
+      In the case where a users password is obtained then you have broken both your confidentiality of the website and also your integrity, due to allowing someone other than the actual owner of the account to act as if they were them. 
+
+      % subsubsection possible_exploits (end)
+
+      \subsubsection{Location} % (fold)
+      \label{ssub:location}
+      
+      The location of this exploit is obviously the password field for the users. The cryptographic algorithm currently used is md5 of which was invented back in 1991, however was proved broken in 2012. Therefore using it now is quite innefective due to the range of tools that are now available to crack these hashes
+
+      \begin{lstlisting}
+            
+         /* Registering */
+
+         $hashPassord = md5($password1);
+
+         $query = "INSERT INTO Users (username, password, email, name) 
+            VALUES ('$username', '$hashPassord', '$email', '$name')";
+
+         ... 
+
+         /* Logging in */
+
+         if(md5($password) == $row['password']){
+            /* Proceed to home page */
+         }
+         else{
+            /* Display incorrect password */
+         }
+            
+
+
+      \end{lstlisting}
+
+      % subsubsection location (end)
+
+      \subsubsection{Instructions} % (fold)
+      \label{ssub:instructions}
+      
+      \begin{itemize}
+         \item Login as admin:admin
+         \item Goto \url{https://192.168.56.150/admin/viewTables.php?table=Users}
+         \item Copy any of the hashed passwords
+         \item Decrypt it as \url{www.md5online.org}
+      \end{itemize}
+
+      % subsubsection instructions (end)
+
+      \subsubsection{Mitigate Strategy} % (fold)
+      \label{ssub:mitigate_strategy}
+      
+      The most simplest solution is just to change the cryptographic algorithm that is being used, and luckily PHP has your back in this case and has an option to hash a string with the the ``Default'' hash. Meaning it a currently used hashing algorithm that is still known to be safe. If the code is changed to:
+
+      \begin{lstlisting}
+         $hashPassword = password_hash($password, PASSWORD_DEFAULT);
+      \end{lstlisting}
+
+      And then when it comes to verifying it you instead do
+
+      \begin{lstlisting}
+         if(password_verify($password, $hashPassword)){
+            /* Passwords match*/
+         }else{
+            /* Passwords dont match */
+         }
+      \end{lstlisting}
+
+      % subsubsection mitigate_strategy (end)   
+
+   % section using_a_broken_or_risky_cryptographic_algorithm (end)
+
+   % subsection empty_password (end)
+
+   \subsection{Multiple Admin Levels} % (fold)
+   \label{sub:multiple_admin_levels}
+
+      \url{https://www.owasp.org/index.php/Multiple_admin_levels}
+   
+      \subsubsection{Description} % (fold)
+      \label{ssub:multiple_admin_levels_description}
+      
+      In an application or website where administration privileges are implemented, in some cases it is required to have multiple levels of admin. For example you would have 3 possible levels
+
+      \begin{enumerate}
+         \item Admin: Can do anything they want
+         \item Moderator: Has restricted admin privileges but can still access some restricted content. In this case they cant add or remove, only edit.
+         \item User: The normal access level for a user.
+      \end{enumerate}
+
+
+      % subsubsection description (end)
+
+      \subsubsection{Possible Exploits} % (fold)
+      \label{ssub:multiple_admin_levels_possible_exploits}
+      
+      The vulnerability comes into place when a user with certain access level can use their privileges to modify themselves to a higher level or modify a user that already has a higher access level. 
+
+      % subsubsection possible_exploits (end)
+
+      \subsubsection{Location} % (fold)
+      \label{ssub:multiple_admin_levelsub:s_location}
+      
+      When viewing the edit Users page the list of users and there admin privileges can be seen, they can also be changed. By being a moderator you are not allowed to remove or delete users and movies, however that doesnt prevent you from changing the permissions of either yourself or another user (ie admin). 
+
+      % subsubsection location (end)
+
+      \subsubsection{Instructions} % (fold)
+      \label{ssub:multiple_admin_levels_instructions}
+      
+      \begin{itemize}
+         \item Log in as moderator:moderator
+         \item Goto \url{https://192.168.56.150/admin/editUsers.php}
+         \item Modify moderator and set Access to admin
+         \item Congrats you just escalated your own privileges 
+      \end{itemize}
+
+      % subsubsection instructions (end)
+
+      \subsubsection{Mitigate Strategy} % (fold)
+      \label{ssub:multiple_admin_levels_mitigate_strategy}
+      
+      There many different strategies to assist in mitigating this vulnerability however they are all dependant on what the system requires, One such solution in the example of this website would be to, if the access level is moderator, then only show users whos access level is lower then your own (in this case access:user). 
+
+      However in the case where a moderator still needs to be able to see all users irrelevant of their access level, such as the current implementation, then a defence needs to be added to block moderators and even user access level from modifying those of equal or higher level then them. Solution would be to store a ranking system that determines if you have high enough access level and if required level isn't reached then disable modification features for that user, however still allow them to view that that user exists in the system.
+
+      \begin{lstlisting}
+   /*UserID user being modified*/
+   $modUserID = $_POST["userID"];
+
+   $sql = "SELECT access FROM Users WHERE userID = $modUserID";
+
+   /*Current access of user being modified*/
+   $modCurrentAccess = mysqli_fetch_assoc(mysqli_query($db, $sql))['access'];
+   
+   /*Access of user logged in*/
+   $modAccess = $_POST["access"];
+
+   /*If your access is user you cant alter anyone*/
+   if($_SESSION['access'] == 'user')
+      return
+   /*If access is moderator you can only modify accounts to and from users and moderator access*/
+   if($_SESSION['access'] == 'moderator' && ($modCurrentAccess == 'admin' || $modAccess == 'admin')
+      return         
+
+      \end{lstlisting}
+
+      % subsubsection mitigate_strategy (end)
+
+   % subsection multiple_admin_levels (end)
+
+   \subsection{Password Management: Hard-coded Password} % (fold)
+   \label{sub:hardcoded_passwords}
+
+      \url{https://www.owasp.org/index.php/Password_Management:_Hardcoded_Password}
+   
+      \subsubsection{Description} % (fold)
+      \label{ssub:hard-coded_passwords_description}
+
+      Hard-coded passwords are a vulnerability that are pretty self explanatory, somewhere in the code or configuration a password is written in plain text and if someone was to get access to the location of it they can read the password as it is.
+
+      % subsubsection description (end)
+
+      \subsubsection{Possible Exploits} % (fold)
+      \label{ssub:hard-coded_passwords_possible_exploits}
+      
+      If you can get access or view the file that has the password hard-coded for the MySQL connection, then you are able to retrieve it and use it as you wish. You can then attempt to connect and query the database manually without going through the website.
+
+      % subsubsection possible_exploits (end)
+
+      \subsubsection{Location} % (fold)
+      \label{ssub:hard-coded_passwords_location}
+      
+      In this implementation the password that has been hard-coded is the database password. If you open up the file php/config.php then you will see it there. If you try to get to the link manually you'll notice it is empty so it must be safe right? Nope.
+
+      \begin{lstlisting}
+   define('DB_SERVER', 'localhost');
+   define('DB_USERNAME', 'ccsep');
+   define('DB_PASSWORD', 'ccsep_2018');
+   define('DB_DATABASE', 'assignment');
+   $db = mysqli_connect(DB_SERVER,DB_USERNAME,DB_PASSWORD,DB_DATABASE);
+      \end{lstlisting}
+
+
+      % subsubsection location (end)
+
+      \subsubsection{Instructions} % (fold)
+      \label{ssub:hard-coded_passwords_instructions}
+      
+      These instructions will show how to get the config.php file from the web server and view the password from the client side. This method works due to also having the File Include vulnerability as stated before
+
+      \begin{itemize}
+         \item Goto \url{https://192.168.56.150/account.php?view=php://filter/convert.base64-encode/resource=php/config}
+         \item Copy the base64 text and decode it
+         \item View the contents that you have received
+         \item You now have all the connection information
+      \end{itemize}
+
+      % subsubsection instructions (end)
+
+      \subsubsection{Mitigate Strategy} % (fold)
+      \label{ssub:hard-coded_passwords_mitigate_strategy}
+      
+      The main issue with this vulnerability is that majority of the time, the connection needs to somehow know the password to use for the connection. So instead of removing it you mostly just need to try protect it.
+
+      A simple yet not very effective solution is to move the configuration file outside the wwwroot directory. That way they cannot get direct access to it, and if the systems permissions are setup correctly then they cant get indirect access due to user permissions. 
+
+      The instructions used to get the configuration file only worked due to the fact that the file is appended with a php extension. Therefore another method of mitigating this vulnerability is to place the sql setting in a .ini file and then load it. And then to prevent direct access to this file use a .htaccess to set the permissions for that file to Deny from All 
+
+      % subsubsection mitigate_strategy (end)
+
+   % subsection hardcoded_passwords (end)
+
+% section other_vulnerabilities (end)
+
+\section{Instructions} % (fold)
+\label{sec:instructions}
+
+No modifications have been don't to the VM. In order to install the vm go to the root directory of the submission and run the install script. ./setupAssignmnet \\\\ 
+\textcolor{red}{Warning: This will delete any files currently in the /var/www/html/ directory and drop the current assignment database.}
+
+% section instructions (end)
+
+\section{Known Defects} % (fold)
+\label{sec:known_defects}
+
+All the listed vulnerabilities were ones that I intentionally implemented and located in the website, there may be and is most likely other locations where vulnerabilities may exist. For example no sql injection or xss vulnerabilities were tested in the admin pages, however they are most likely present there is tested.
+
+The website itself however works as intended and all requested features can be used, and if a regular user what to try and use the website, the chance of them occidentally running into a vulnerability is limited
+
+
+A vulnerability that could've been discussed is the fact that no logging was done on the website, however this was ignored due to the fact that it was already done by me not having to do anything to create it. 
+% section known_defects (end)
+\nocite{*}
+\printbibliography[
+   heading=bibintoc,
+   title={References}
+]
+
+
+\end{document}

@@ -1,0 +1,42 @@
+/* 
+ * @Author: zazu
+ * @Date:   2018-08-30 08:40:44
+ * @Last Modified by: Zazu
+ * @Last Modified time: 2019-03-28 14:11:48
+*/
+
+body, html{
+   background: url(/img/background.png) no-repeat center center fixed #131313; 
+   -webkit-background-size: cover;
+   -moz-background-size: cover;
+   -o-background-size: cover;
+   background-size: cover;
+   color: #fff;
+}
+
+nav{
+   border-bottom: solid 4px #04c3ea;
+   margin-bottom: 1rem;
+}
+
+/*Hide the scroll bar on number fields*/
+input[type='number'] {
+   -moz-appearance:textfield;
+} 
+
+.dropdown-menu{
+   /*Remove the gap between the nav button and the dropdown menu*/
+   margin-top: 0;
+}
+
+.dropdown:hover > .dropdown-menu {
+   display: block;
+}
+
+.dropdown > .dropdown-toggle:active {
+   pointer-events: none;
+}
+
+tbody tr:hover{
+         background-color: #424954 !important
+      }

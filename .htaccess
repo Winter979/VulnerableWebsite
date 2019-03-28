@@ -1,0 +1,4 @@
+#Redirect appropiate errors to their corresponding pages
+ErrorDocument 404 /404.php
+ErrorDocument 403 /403.php
+
